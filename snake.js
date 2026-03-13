@@ -13,6 +13,7 @@ let pausa = false
 let mostraScritta = false   // true = mostra scritta iniziale
 let mostraImmagine = false  // true = mostra immagine sbloccata
 let imgGrande = null
+let gameOver = false       // nuovo flag per game over
 
 const figurine = [
     {punti:5, img:"images/amico1.png"},
@@ -24,6 +25,12 @@ const figurine = [
 document.addEventListener("keydown", cambiaDirezione)
 
 function cambiaDirezione(e){
+    if(gameOver && e.key === "Enter"){
+        // Riavvia il gioco
+        resetGame()
+        return
+    }
+
     if(e.key === "Enter" && pausa){
         if(mostraScritta){
             // Passa dalla scritta all'immagine
@@ -48,10 +55,19 @@ function gameLoop(){
 
     ctx.clearRect(0,0,400,400)
 
+    if(gameOver){
+        // Mostra messaggio game over
+        ctx.font = "30px Arial"
+        ctx.fillStyle = "red"
+        ctx.textAlign = "center"
+        ctx.fillText("Game Over! Premi ENTER per ricominciare", 200, 200)
+        return
+    }
+
     if(pausa){
         if(mostraScritta){
             // Mostra scritta centrata
-            ctx.font = "30px Arial"
+            ctx.font = "20px Arial"
             ctx.fillStyle = "black"
             ctx.textAlign = "center"
             ctx.fillText("Complimenti! Hai sbloccato una nuova foto!", 200, 200)
@@ -63,6 +79,21 @@ function gameLoop(){
     }
 
     const head = {x:snake[0].x+dx, y:snake[0].y+dy}
+
+    // Controlla collisione bordi
+    if(head.x < 0 || head.x >= 400 || head.y < 0 || head.y >= 400){
+        gameOver = true
+        return
+    }
+
+    // Controlla collisione con se stesso
+    for(let i=0; i<snake.length; i++){
+        if(head.x === snake[i].x && head.y === snake[i].y){
+            gameOver = true
+            return
+        }
+    }
+
     snake.unshift(head)
 
     if(head.x===food.x && head.y===food.y){
@@ -93,6 +124,7 @@ function gameLoop(){
 
 }
 
+// controlla se sbloccare figurine
 function controllaFigurine(){
     figurine.forEach(f=>{
         if(score === f.punti){
@@ -109,6 +141,21 @@ function controllaFigurine(){
             document.getElementById("cards").appendChild(img)
         }
     })
+}
+
+// reset gioco
+function resetGame(){
+    snake = [{x:200,y:200}]
+    dx = 20
+    dy = 0
+    food = {x:100,y:100}
+    score = 0
+    document.getElementById("score").innerText = score
+    pausa = false
+    mostraScritta = false
+    mostraImmagine = false
+    imgGrande = null
+    gameOver = false
 }
 
 setInterval(gameLoop,100)
