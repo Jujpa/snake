@@ -58,10 +58,10 @@ function gameLoop(){
     if(gameOver){
         // Mostra messaggio game over
         ctx.font = "30px Arial"
-        ctx.fillStyle = "yellow"
+        ctx.fillStyle = "red"
         ctx.textAlign = "center"
-        ctx.fillText("Game Over!", 200, 200)
-        ctx.fillText("Premi ENTER per ricominciare", 200, 200)
+        ctx.fillText("Game Over!
+                     Premi ENTER per ricominciare", 200, 200)
         return
     }
 
