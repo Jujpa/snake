@@ -18,8 +18,8 @@ let gameOver = false       // nuovo flag per game over
 const figurine = [
     {punti:5, img:"images/amico1.png"},
     {punti:10, img:"images/amico2.png"},
-    {punti:15, img:"images/amico3.png"},
-    {punti:20, img:"images/amico4.png"}
+    {punti:20, img:"images/amico3.png"},
+    {punti:35, img:"images/amico4.png"}
 ]
 
 document.addEventListener("keydown", cambiaDirezione)
@@ -60,7 +60,8 @@ function gameLoop(){
         ctx.font = "30px Arial"
         ctx.fillStyle = "red"
         ctx.textAlign = "center"
-        ctx.fillText("Game Over! Premi ENTER per ricominciare", 200, 200)
+        ctx.fillText("Game Over!", 200, 200)
+        ctx.fillText("Premi ENTER per ricominciare", 200, 200)
         return
     }
 
