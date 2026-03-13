@@ -9,70 +9,97 @@ let food = {x:100,y:100}
 
 let score = 0
 
+let pausa = false
+let imgGrande = null
+
 const figurine = [
     {punti:5, img:"images/amico1.png"},
     {punti:10, img:"images/amico2.png"},
-    {punti:20, img:"images/amico3.png"}
+    {punti:15, img:"images/amico3.png"},
+    {punti:20, img:"images/amico4.png"}
 ]
 
 document.addEventListener("keydown", cambiaDirezione)
 
 function cambiaDirezione(e){
 
-if(e.key==="ArrowUp"){dx=0;dy=-20}
-if(e.key==="ArrowDown"){dx=0;dy=20}
-if(e.key==="ArrowLeft"){dx=-20;dy=0}
-if(e.key==="ArrowRight"){dx=20;dy=0}
+    if(e.key === "Enter" && pausa){
+        pausa = false
+        imgGrande = null
+        return
+    }
+
+    if(e.key==="ArrowUp"){dx=0;dy=-20}
+    if(e.key==="ArrowDown"){dx=0;dy=20}
+    if(e.key==="ArrowLeft"){dx=-20;dy=0}
+    if(e.key==="ArrowRight"){dx=20;dy=0}
 
 }
 
 function gameLoop(){
 
-const head = {x:snake[0].x+dx,y:snake[0].y+dy}
+    if(pausa){
 
-snake.unshift(head)
+        ctx.clearRect(0,0,400,400)
 
-if(head.x===food.x && head.y===food.y){
+        if(imgGrande){
+            ctx.drawImage(imgGrande,50,50,300,300)
+        }
 
-score++
-document.getElementById("score").innerText=score
+        return
+    }
 
-food={
-x:Math.floor(Math.random()*20)*20,
-y:Math.floor(Math.random()*20)*20
-}
+    const head = {x:snake[0].x+dx,y:snake[0].y+dy}
 
-controllaFigurine()
+    snake.unshift(head)
 
-}else{
-snake.pop()
-}
+    if(head.x===food.x && head.y===food.y){
 
-ctx.clearRect(0,0,400,400)
+        score++
+        document.getElementById("score").innerText = score
 
-ctx.fillStyle="green"
-snake.forEach(s=>{
-ctx.fillRect(s.x,s.y,20,20)
-})
+        food = {
+            x:Math.floor(Math.random()*20)*20,
+            y:Math.floor(Math.random()*20)*20
+        }
 
-ctx.fillStyle="red"
-ctx.fillRect(food.x,food.y,20,20)
+        controllaFigurine()
+
+    }else{
+        snake.pop()
+    }
+
+    ctx.clearRect(0,0,400,400)
+
+    ctx.fillStyle="green"
+    snake.forEach(s=>{
+        ctx.fillRect(s.x,s.y,20,20)
+    })
+
+    ctx.fillStyle="red"
+    ctx.fillRect(food.x,food.y,20,20)
 
 }
 
 function controllaFigurine(){
 
-figurine.forEach(f=>{
+    figurine.forEach(f=>{
 
-if(score===f.punti){
+        if(score === f.punti){
 
-const img=document.createElement("img")
-img.src=f.img
-document.getElementById("cards").appendChild(img)
+            pausa = true
 
-}
+            imgGrande = new Image()
+            imgGrande.src = f.img
 
-})
+            const img = document.createElement("img")
+            img.src = f.img
+
+            document.getElementById("cards").appendChild(img)
+
+        }
+
+    })
 
 }
 
