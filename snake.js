@@ -58,7 +58,7 @@ function gameLoop(){
                 animazione.size += 5
             } else {
                 animazione = null
-                scrittaTimer = 50 // durata della scritta
+                scrittaTimer = 150 // durata della scritta
             }
         } else {
             // Disegna immagine finale
@@ -109,16 +109,15 @@ function gameLoop(){
 }
 
 function controllaFigurine(){
-
     figurine.forEach(f=>{
         if(score === f.punti){
-
             pausa = true
 
             imgGrande = new Image()
+            imgGrande.onload = () => {
+                animazione = {size:0, targetSize:300} // parte da 0px solo quando pronta
+            }
             imgGrande.src = f.img
-
-            animazione = {size:0, targetSize:300} // parte da 0px e ingrandisce a 300px
 
             // aggiungi immagine piccola sotto
             const img = document.createElement("img")
@@ -126,7 +125,15 @@ function controllaFigurine(){
             document.getElementById("cards").appendChild(img)
         }
     })
-
 }
 
-setInterval(gameLoop,100)
+function startLoop(){
+    requestAnimationFrame(loop)
+}
+
+function loop(){
+    gameLoop()
+    requestAnimationFrame(loop)
+}
+
+startLoop()
