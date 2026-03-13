@@ -10,6 +10,8 @@ let food = {x:100,y:100}
 let score = 0
 
 let pausa = false
+let mostraScritta = false   // true = mostra scritta iniziale
+let mostraImmagine = false  // true = mostra immagine sbloccata
 let imgGrande = null
 
 const figurine = [
@@ -22,10 +24,17 @@ const figurine = [
 document.addEventListener("keydown", cambiaDirezione)
 
 function cambiaDirezione(e){
-
     if(e.key === "Enter" && pausa){
-        pausa = false
-        imgGrande = null
+        if(mostraScritta){
+            // Passa dalla scritta all'immagine
+            mostraScritta = false
+            mostraImmagine = true
+        } else if(mostraImmagine){
+            // Immagine mostrata → riprende gioco
+            pausa = false
+            mostraImmagine = false
+            imgGrande = null
+        }
         return
     }
 
@@ -33,24 +42,27 @@ function cambiaDirezione(e){
     if(e.key==="ArrowDown"){dx=0;dy=20}
     if(e.key==="ArrowLeft"){dx=-20;dy=0}
     if(e.key==="ArrowRight"){dx=20;dy=0}
-
 }
 
 function gameLoop(){
 
+    ctx.clearRect(0,0,400,400)
+
     if(pausa){
-
-        ctx.clearRect(0,0,400,400)
-
-        if(imgGrande){
+        if(mostraScritta){
+            // Mostra scritta centrata
+            ctx.font = "20px Arial"
+            ctx.fillStyle = "yellow"
+            ctx.textAlign = "center"
+            ctx.fillText("Complimenti! Hai sbloccato una nuova foto!", 200, 200)
+        } else if(mostraImmagine && imgGrande){
+            // Mostra immagine grande
             ctx.drawImage(imgGrande,50,50,300,300)
         }
-
         return
     }
 
-    const head = {x:snake[0].x+dx,y:snake[0].y+dy}
-
+    const head = {x:snake[0].x+dx, y:snake[0].y+dy}
     snake.unshift(head)
 
     if(head.x===food.x && head.y===food.y){
@@ -69,38 +81,34 @@ function gameLoop(){
         snake.pop()
     }
 
-    ctx.clearRect(0,0,400,400)
-
+    // disegna snake
     ctx.fillStyle="green"
     snake.forEach(s=>{
         ctx.fillRect(s.x,s.y,20,20)
     })
 
+    // disegna cibo
     ctx.fillStyle="red"
     ctx.fillRect(food.x,food.y,20,20)
 
 }
 
 function controllaFigurine(){
-
     figurine.forEach(f=>{
-
         if(score === f.punti){
-
             pausa = true
+            mostraScritta = true
+            mostraImmagine = false
 
             imgGrande = new Image()
             imgGrande.src = f.img
 
+            // aggiungi immagine piccola sotto
             const img = document.createElement("img")
             img.src = f.img
-
             document.getElementById("cards").appendChild(img)
-
         }
-
     })
-
 }
 
 setInterval(gameLoop,100)
