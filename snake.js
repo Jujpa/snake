@@ -60,8 +60,8 @@ function gameLoop(){
         ctx.font = "30px Arial"
         ctx.fillStyle = "red"
         ctx.textAlign = "center"
-        ctx.fillText("Game Over!
-                     Premi ENTER per ricominciare", 200, 200)
+        ctx.fillText("Game Over!", 200, 180)
+        ctx.fillText("Premi ENTER per ricominciare", 200, 220)
         return
     }
 
