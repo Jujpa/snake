@@ -9,11 +9,10 @@ let food = {x:100,y:100}
 
 let score = 0
 
-// Stato del gioco
-let pausa = false           // pausa totale
+let pausa = false
 let mostraScritta = false   // true = mostra scritta iniziale
-let animazione = null       // info animazione ingrandimento
-let imgGrande = null        // immagine della figurina
+let mostraImmagine = false  // true = mostra immagine sbloccata
+let imgGrande = null
 
 const figurine = [
     {punti:5, img:"images/amico1.png"},
@@ -25,15 +24,15 @@ const figurine = [
 document.addEventListener("keydown", cambiaDirezione)
 
 function cambiaDirezione(e){
-    // ENTER gestisce lo step successivo
     if(e.key === "Enter" && pausa){
         if(mostraScritta){
-            // Passa da scritta a animazione
+            // Passa dalla scritta all'immagine
             mostraScritta = false
-            animazione = {size:0, targetSize:300}
-        } else if(animazione === null){
-            // Animazione finita → riprende gioco
+            mostraImmagine = true
+        } else if(mostraImmagine){
+            // Immagine mostrata → riprende gioco
             pausa = false
+            mostraImmagine = false
             imgGrande = null
         }
         return
@@ -46,48 +45,28 @@ function cambiaDirezione(e){
 }
 
 function gameLoop(){
+
     ctx.clearRect(0,0,400,400)
 
     if(pausa){
-        // Se siamo in pausa per la scritta
         if(mostraScritta){
+            // Mostra scritta centrata
             ctx.font = "20px Arial"
             ctx.fillStyle = "yellow"
             ctx.textAlign = "center"
             ctx.fillText("Complimenti! Hai sbloccato una nuova foto!", 200, 200)
-            return
-        }
-
-        // Se siamo in pausa per animazione immagine
-        if(animazione){
-            if(imgGrande){
-                const size = animazione.size
-                const x = (400 - size)/2
-                const y = (400 - size)/2
-                ctx.drawImage(imgGrande, x, y, size, size)
-
-                if(animazione.size < animazione.targetSize){
-                    animazione.size += 5
-                } else {
-                    animazione = null
-                }
-            }
-            return
-        }
-
-        // Se pausa ma animazione finita, resta immagine finale
-        if(imgGrande){
+        } else if(mostraImmagine && imgGrande){
+            // Mostra immagine grande
             ctx.drawImage(imgGrande,50,50,300,300)
         }
-
         return
     }
 
-    // logica snake normale
     const head = {x:snake[0].x+dx, y:snake[0].y+dy}
     snake.unshift(head)
 
     if(head.x===food.x && head.y===food.y){
+
         score++
         document.getElementById("score").innerText = score
 
@@ -97,7 +76,8 @@ function gameLoop(){
         }
 
         controllaFigurine()
-    } else {
+
+    }else{
         snake.pop()
     }
 
@@ -110,6 +90,7 @@ function gameLoop(){
     // disegna cibo
     ctx.fillStyle="red"
     ctx.fillRect(food.x,food.y,20,20)
+
 }
 
 function controllaFigurine(){
@@ -117,6 +98,7 @@ function controllaFigurine(){
         if(score === f.punti){
             pausa = true
             mostraScritta = true
+            mostraImmagine = false
 
             imgGrande = new Image()
             imgGrande.src = f.img
@@ -129,23 +111,4 @@ function controllaFigurine(){
     })
 }
 
-function startLoop(){
-    requestAnimationFrame(loop)
-}
-
-let lastTime = 0
-const speed = 250 // millisecondi tra un movimento e l'altro
-
-function loop(timestamp){
-    if(!lastTime) lastTime = timestamp
-    const delta = timestamp - lastTime
-
-    if(delta > speed){
-        gameLoop()
-        lastTime += speed  // meglio di lastTime = timestamp
-    }
-
-    requestAnimationFrame(loop)
-}
-
-startLoop() // chiamala una sola volta all'inizio
+setInterval(gameLoop,100)
