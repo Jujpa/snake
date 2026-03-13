@@ -134,7 +134,7 @@ function startLoop(){
 }
 
 let lastTime = 0
-const speed = 100 // millisecondi tra un movimento e l'altro
+const speed = 250 // millisecondi tra un movimento e l'altro
 
 function loop(timestamp){
     if(!lastTime) lastTime = timestamp
@@ -142,7 +142,7 @@ function loop(timestamp){
 
     if(delta > speed){
         gameLoop()
-        lastTime = timestamp
+        lastTime += speed  // meglio di lastTime = timestamp
     }
 
     requestAnimationFrame(loop)
