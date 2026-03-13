@@ -1,6 +1,9 @@
 const canvas = document.getElementById("game")
 const ctx = canvas.getContext("2d")
 
+let pausa = false
+let imgGrande = null
+
 let snake = [{x:200,y:200}]
 let dx = 20
 let dy = 0
@@ -23,10 +26,23 @@ if(e.key==="ArrowUp"){dx=0;dy=-20}
 if(e.key==="ArrowDown"){dx=0;dy=20}
 if(e.key==="ArrowLeft"){dx=-20;dy=0}
 if(e.key==="ArrowRight"){dx=20;dy=0}
+if(e.key === "Enter" && pausa){
+pausa = false
+}
 
 }
 
 function gameLoop(){
+    if(pausa){
+
+    ctx.clearRect(0,0,400,400)
+
+    if(imgGrande){
+        ctx.drawImage(imgGrande,50,50,300,300)
+    }
+
+    return
+}
 
 const head = {x:snake[0].x+dx,y:snake[0].y+dy}
 
@@ -36,6 +52,9 @@ if(head.x===food.x && head.y===food.y){
 
 score++
 document.getElementById("score").innerText=score
+    if(score % 5 === 0){
+    mostraFigurina()
+}
 
 food={
 x:Math.floor(Math.random()*20)*20,
@@ -59,6 +78,20 @@ ctx.fillStyle="red"
 ctx.fillRect(food.x,food.y,20,20)
 
 }
+function mostraFigurina() {
+
+    const index = Math.floor(score / 5) - 1
+
+    if(index < figurine.length){
+
+        pausa = true
+
+        imgGrande = new Image()
+        imgGrande.src = figurine[index]
+
+    }
+
+}
 
 function controllaFigurine(){
 
@@ -71,6 +104,7 @@ img.src=f.img
 document.getElementById("cards").appendChild(img)
 
 }
+    
 
 })
 
