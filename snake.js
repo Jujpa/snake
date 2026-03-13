@@ -9,10 +9,11 @@ let food = {x:100,y:100}
 
 let score = 0
 
-let pausa = false
-let imgGrande = null
-let animazione = null  // info per animazione
-let scrittaTimer = 0   // timer per la scritta
+// Stato del gioco
+let pausa = false           // pausa totale
+let mostraScritta = false   // true = mostra scritta iniziale
+let animazione = null       // info animazione ingrandimento
+let imgGrande = null        // immagine della figurina
 
 const figurine = [
     {punti:5, img:"images/amico1.png"},
@@ -24,12 +25,17 @@ const figurine = [
 document.addEventListener("keydown", cambiaDirezione)
 
 function cambiaDirezione(e){
-
+    // ENTER gestisce lo step successivo
     if(e.key === "Enter" && pausa){
-        pausa = false
-        imgGrande = null
-        animazione = null
-        scrittaTimer = 0
+        if(mostraScritta){
+            // Passa da scritta a animazione
+            mostraScritta = false
+            animazione = {size:0, targetSize:300}
+        } else if(animazione === null){
+            // Animazione finita → riprende gioco
+            pausa = false
+            imgGrande = null
+        }
         return
     }
 
@@ -40,38 +46,38 @@ function cambiaDirezione(e){
 }
 
 function gameLoop(){
-
     ctx.clearRect(0,0,400,400)
 
     if(pausa){
-
-        // Disegna animazione ingrandimento
-        if(animazione){
-            const progress = animazione.size/animazione.targetSize
-            const size = animazione.size
-            const x = (400 - size)/2
-            const y = (400 - size)/2
-
-            ctx.drawImage(imgGrande, x, y, size, size)
-
-            if(progress < 1){
-                animazione.size += 5
-            } else {
-                animazione = null
-                scrittaTimer = 150 // durata della scritta
-            }
-        } else {
-            // Disegna immagine finale
-            ctx.drawImage(imgGrande,50,50,300,300)
-        }
-
-        // Mostra scritta
-        if(scrittaTimer > 0){
+        // Se siamo in pausa per la scritta
+        if(mostraScritta){
             ctx.font = "20px Arial"
             ctx.fillStyle = "yellow"
             ctx.textAlign = "center"
-            ctx.fillText("Complimenti! Hai sbloccato una nuova foto!", 200, 30)
-            scrittaTimer--
+            ctx.fillText("Complimenti! Hai sbloccato una nuova foto!", 200, 200)
+            return
+        }
+
+        // Se siamo in pausa per animazione immagine
+        if(animazione){
+            if(imgGrande){
+                const size = animazione.size
+                const x = (400 - size)/2
+                const y = (400 - size)/2
+                ctx.drawImage(imgGrande, x, y, size, size)
+
+                if(animazione.size < animazione.targetSize){
+                    animazione.size += 5
+                } else {
+                    animazione = null
+                }
+            }
+            return
+        }
+
+        // Se pausa ma animazione finita, resta immagine finale
+        if(imgGrande){
+            ctx.drawImage(imgGrande,50,50,300,300)
         }
 
         return
@@ -82,7 +88,6 @@ function gameLoop(){
     snake.unshift(head)
 
     if(head.x===food.x && head.y===food.y){
-
         score++
         document.getElementById("score").innerText = score
 
@@ -92,7 +97,6 @@ function gameLoop(){
         }
 
         controllaFigurine()
-
     } else {
         snake.pop()
     }
@@ -112,11 +116,9 @@ function controllaFigurine(){
     figurine.forEach(f=>{
         if(score === f.punti){
             pausa = true
+            mostraScritta = true
 
             imgGrande = new Image()
-            imgGrande.onload = () => {
-                animazione = {size:0, targetSize:300} // parte da 0px solo quando pronta
-            }
             imgGrande.src = f.img
 
             // aggiungi immagine piccola sotto
