@@ -133,9 +133,19 @@ function startLoop(){
     requestAnimationFrame(loop)
 }
 
-function loop(){
-    gameLoop()
+let lastTime = 0
+const speed = 100 // millisecondi tra un movimento e l'altro
+
+function loop(timestamp){
+    if(!lastTime) lastTime = timestamp
+    const delta = timestamp - lastTime
+
+    if(delta > speed){
+        gameLoop()
+        lastTime = timestamp
+    }
+
     requestAnimationFrame(loop)
 }
 
-startLoop()
+startLoop() // chiamala una sola volta all'inizio
