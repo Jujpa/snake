@@ -51,8 +51,8 @@ function gameLoop(){
     if(pausa){
         if(mostraScritta){
             // Mostra scritta centrata
-            ctx.font = "20px Arial"
-            ctx.fillStyle = "yellow"
+            ctx.font = "30px Arial"
+            ctx.fillStyle = "black"
             ctx.textAlign = "center"
             ctx.fillText("Complimenti! Hai sbloccato una nuova foto!", 200, 200)
         } else if(mostraImmagine && imgGrande){
