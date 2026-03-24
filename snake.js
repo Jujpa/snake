@@ -37,7 +37,11 @@ function cambiaDirezione(e){
             mostraScritta = false
             mostraImmagine = true
         } else if(mostraImmagine){
-            // Immagine mostrata → riprende gioco
+            // Immagine mostrata → aggiungi immagine piccola e riprendi gioco
+            const img = document.createElement("img")
+            img.src = imgGrande.src
+            document.getElementById("cards").appendChild(img)
+            
             pausa = false
             mostraImmagine = false
             imgGrande = null
@@ -135,11 +139,6 @@ function controllaFigurine(){
 
             imgGrande = new Image()
             imgGrande.src = f.img
-
-            // aggiungi immagine piccola sotto
-            const img = document.createElement("img")
-            img.src = f.img
-            document.getElementById("cards").appendChild(img)
         }
     })
 }
