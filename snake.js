@@ -3,7 +3,7 @@ const ctx = canvas.getContext("2d")
 
 let snake = [{x:200,y:200}]
 let dx = 20
-let dy = 0
+y = 0
 
 let food = {x:100,y:100}
 
@@ -126,7 +126,6 @@ function gameLoop(){
     // disegna cibo
     ctx.fillStyle="red"
     ctx.fillRect(food.x,food.y,20,20)
-
 }
 
 // controlla se sbloccare figurine
@@ -151,6 +150,8 @@ function resetGame(){
     food = {x:100,y:100}
     score = 0
     document.getElementById("score").innerText = score
+    // Elimina le immagini sbloccate dalle partite precedenti
+    document.getElementById("cards").innerHTML = ""
     pausa = false
     mostraScritta = false
     mostraImmagine = false
