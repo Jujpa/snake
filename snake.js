@@ -10,8 +10,7 @@ let food = {x:100,y:100}
 let score = 0
 
 let pausa = false
-let mostraScritta = false   // true = mostra scritta iniziale
-let mostraImmagine = false  // true = mostra immagine sbloccata
+let mostraSblocco = false  // true = mostra immagine e testo sbloccato
 let imgGrande = null
 let gameOver = false       // nuovo flag per game over
 let gameStarted = false    // flag per indicare se il gioco è iniziato
@@ -25,14 +24,16 @@ const figurine = [
 
 document.addEventListener("keydown", cambiaDirezione)
 
-document.getElementById("startBtn").addEventListener("click", avviaGioco)
-
 function avviaGioco(){
     gameStarted = true
-    document.getElementById("startBtn").style.display = "none"
 }
 
 function cambiaDirezione(e){
+    if(!gameStarted && e.key === "Enter"){
+        avviaGioco()
+        return
+    }
+
     if(gameOver && e.key === "Enter"){
         // Riavvia il gioco
         resetGame()
@@ -40,20 +41,14 @@ function cambiaDirezione(e){
     }
 
     if(e.key === "Enter" && pausa){
-        if(mostraScritta){
-            // Passa dalla scritta all'immagine
-            mostraScritta = false
-            mostraImmagine = true
-        } else if(mostraImmagine){
-            // Immagine mostrata → aggiungi immagine piccola e riprendi gioco
-            const img = document.createElement("img")
-            img.src = imgGrande.src
-            document.getElementById("cards").appendChild(img)
-            
-            pausa = false
-            mostraImmagine = false
-            imgGrande = null
-        }
+        // Aggiungi immagine piccola alla galleria e riprendi il gioco
+        const img = document.createElement("img")
+        img.src = imgGrande.src
+        document.getElementById("cards").appendChild(img)
+        
+        pausa = false
+        mostraSblocco = false
+        imgGrande = null
         return
     }
 
@@ -71,7 +66,7 @@ function gameLoop(){
         ctx.font = "20px Arial"
         ctx.fillStyle = "black"
         ctx.textAlign = "center"
-        ctx.fillText("Premi Start per iniziare", 200, 200)
+        ctx.fillText("Premi ENTER per iniziare", 200, 200)
         return
     }
 
@@ -86,15 +81,13 @@ function gameLoop(){
     }
 
     if(pausa){
-        if(mostraScritta){
-            // Mostra scritta centrata
-            ctx.font = "20px Arial"
+        if(mostraSblocco && imgGrande){
+            ctx.font = "18px Arial"
             ctx.fillStyle = "black"
             ctx.textAlign = "center"
-            ctx.fillText("Complimenti! Hai sbloccato una nuova foto!", 200, 200)
-        } else if(mostraImmagine && imgGrande){
-            // Mostra immagine grande
-            ctx.drawImage(imgGrande,50,50,300,300)
+            ctx.fillText("Complimenti! Hai sbloccato una nuova foto!", 200, 40)
+            ctx.drawImage(imgGrande, 50, 60, 300, 300)
+            ctx.fillText("Premi ENTER per continuare", 200, 385)
         }
         return
     }
@@ -149,8 +142,7 @@ function controllaFigurine(){
     figurine.forEach(f=>{
         if(score === f.punti){
             pausa = true
-            mostraScritta = true
-            mostraImmagine = false
+            mostraSblocco = true
 
             imgGrande = new Image()
             imgGrande.src = f.img
@@ -169,8 +161,7 @@ function resetGame(){
     // Elimina le immagini sbloccate dalle partite precedenti
     document.getElementById("cards").innerHTML = ""
     pausa = false
-    mostraScritta = false
-    mostraImmagine = false
+    mostraSblocco = false
     imgGrande = null
     gameOver = false
     gameStarted = true  // Rimane true dopo il reset
