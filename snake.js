@@ -1,6 +1,9 @@
 const canvas = document.getElementById("game")
 const ctx = canvas.getContext("2d")
 
+const foodImg = new Image()
+foodImg.src = "cibo.png"
+
 let snake = [{x:200,y:200}]
 let dx = 20
 let dy = 0
@@ -10,8 +13,7 @@ let food = {x:100,y:100}
 let score = 0
 
 let pausa = false
-let mostraScritta = false   // true = mostra scritta iniziale
-let mostraImmagine = false  // true = mostra immagine sbloccata
+let mostraSblocco = false  // true = mostra immagine e testo sbloccato
 let imgGrande = null
 let gameOver = false       // nuovo flag per game over
 let gameStarted = false    // flag per indicare se il gioco è iniziato
@@ -20,41 +22,33 @@ const figurine = [
     {punti:5, img:"images/amico1.png"},
     {punti:10, img:"images/amico2.png"},
     {punti:20, img:"images/amico3.png"},
-    {punti:35, img:"images/amico4.png"}
+    {punti:35, img:"images/amico4.png"},
+    {punti:50, img:"images/amico5.png"},
+    {punti:65, img:"images/amico6.png"},
+    {punti:80, img:"images/amico7.png"},
+    {punti:100, img:"images/amico8.png"},
+
 ]
 
 document.addEventListener("keydown", cambiaDirezione)
 
-document.getElementById("startBtn").addEventListener("click", avviaGioco)
-
-function avviaGioco(){
-    gameStarted = true
-    document.getElementById("startBtn").style.display = "none"
-}
-
 function cambiaDirezione(e){
-    if(gameOver && e.key === "Enter"){
-        // Riavvia il gioco
-        resetGame()
-        return
-    }
-
-    if(e.key === "Enter" && pausa){
-        if(mostraScritta){
-            // Passa dalla scritta all'immagine
-            mostraScritta = false
-            mostraImmagine = true
-        } else if(mostraImmagine){
-            // Immagine mostrata → aggiungi immagine piccola e riprendi gioco
+    // Gestione unificata del tasto Enter
+    if (e.key === "Enter") {
+        if (!gameStarted || gameOver) {
+            resetGame()
+            return
+        }
+        if (pausa && mostraSblocco) {
+            // Aggiungi immagine alla galleria e riprendi
             const img = document.createElement("img")
             img.src = imgGrande.src
             document.getElementById("cards").appendChild(img)
-            
             pausa = false
-            mostraImmagine = false
+            mostraSblocco = false
             imgGrande = null
+            return
         }
-        return
     }
 
     if(e.key==="ArrowUp"){dx=0;dy=-20}
@@ -65,19 +59,29 @@ function cambiaDirezione(e){
 
 function gameLoop(){
 
+    // Puliamo il canvas rendendolo trasparente per mostrare lo sfondo della pagina
     ctx.clearRect(0,0,400,400)
+    
+    ctx.strokeStyle = "rgba(0, 0, 0, 0.05)" // Griglia semi-trasparente e sottile
+    ctx.lineWidth = 1
+    for(let i=0; i<=400; i+=20){
+        ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,400); ctx.stroke()
+        ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(400,i); ctx.stroke()
+    }
 
     if(!gameStarted){
+        ctx.shadowBlur = 4; ctx.shadowColor = "rgba(0,0,0,0.2)"
         ctx.font = "20px Arial"
         ctx.fillStyle = "black"
         ctx.textAlign = "center"
-        ctx.fillText("Premi Start per iniziare", 200, 200)
+        ctx.fillText("Premi ENTER per iniziare", 200, 200)
         return
     }
 
     if(gameOver){
         // Mostra messaggio game over
-        ctx.font = "30px Arial"
+        ctx.shadowBlur = 10; ctx.shadowColor = "rgba(0,0,0,0.5)"
+        ctx.font = "25px Arial"
         ctx.fillStyle = "red"
         ctx.textAlign = "center"
         ctx.fillText("Game Over!", 200, 180)
@@ -86,15 +90,13 @@ function gameLoop(){
     }
 
     if(pausa){
-        if(mostraScritta){
-            // Mostra scritta centrata
-            ctx.font = "20px Arial"
+        if(mostraSblocco && imgGrande){
+            ctx.font = "18px Arial"
             ctx.fillStyle = "black"
             ctx.textAlign = "center"
-            ctx.fillText("Complimenti! Hai sbloccato una nuova foto!", 200, 200)
-        } else if(mostraImmagine && imgGrande){
-            // Mostra immagine grande
-            ctx.drawImage(imgGrande,50,50,300,300)
+            ctx.fillText("Complimenti! Hai sbloccato una nuova foto!", 200, 40)
+            ctx.drawImage(imgGrande, 50, 60, 300, 300)
+            ctx.fillText("Premi ENTER per continuare", 200, 385)
         }
         return
     }
@@ -133,15 +135,43 @@ function gameLoop(){
         snake.pop()
     }
 
-    // disegna snake
-    ctx.fillStyle="green"
-    snake.forEach(s=>{
-        ctx.fillRect(s.x,s.y,20,20)
+    // Disegna lo Snake con stile
+    snake.forEach((s, index) => {
+        const isHead = index === 0
+        
+        // Colore differenziato tra testa e corpo
+        ctx.fillStyle = isHead ? "#2d6a4f" : "#52b788"
+        ctx.strokeStyle = "#1b4332"
+        ctx.lineWidth = 1
+
+        // Disegna il segmento arrotondato
+        const radius = 6
+        ctx.beginPath()
+        ctx.roundRect(s.x + 1, s.y + 1, 18, 18, radius)
+        ctx.fill()
+        ctx.stroke()
+
+        // Aggiungi gli occhi alla testa
+        if (isHead) {
+            ctx.fillStyle = "white"
+            // Occhio sinistro
+            ctx.beginPath(); ctx.arc(s.x + 6, s.y + 6, 2.5, 0, Math.PI * 2); ctx.fill()
+            // Occhio destro
+            ctx.beginPath(); ctx.arc(s.x + 14, s.y + 6, 2.5, 0, Math.PI * 2); ctx.fill()
+            
+            // Pupille (che guardano avanti in base a dx/dy)
+            ctx.fillStyle = "black"
+            let px = dx === 0 ? 0 : (dx > 0 ? 1 : -1)
+            let py = dy === 0 ? 0 : (dy > 0 ? 1 : -1)
+            ctx.beginPath(); ctx.arc(s.x + 6 + px, s.y + 6 + py, 1, 0, Math.PI * 2); ctx.fill()
+            ctx.beginPath(); ctx.arc(s.x + 14 + px, s.y + 6 + py, 1, 0, Math.PI * 2); ctx.fill()
+        }
     })
 
-    // disegna cibo
-    ctx.fillStyle="red"
-    ctx.fillRect(food.x,food.y,20,20)
+    // Disegna cibo con una piccola ombra
+    ctx.shadowBlur = 5; ctx.shadowColor = "rgba(0,0,0,0.3)"
+    ctx.drawImage(foodImg, food.x, food.y, 20, 20)
+    ctx.shadowBlur = 0 // Reset ombra per i prossimi cicli
 }
 
 // controlla se sbloccare figurine
@@ -149,8 +179,7 @@ function controllaFigurine(){
     figurine.forEach(f=>{
         if(score === f.punti){
             pausa = true
-            mostraScritta = true
-            mostraImmagine = false
+            mostraSblocco = true
 
             imgGrande = new Image()
             imgGrande.src = f.img
@@ -169,8 +198,7 @@ function resetGame(){
     // Elimina le immagini sbloccate dalle partite precedenti
     document.getElementById("cards").innerHTML = ""
     pausa = false
-    mostraScritta = false
-    mostraImmagine = false
+    mostraSblocco = false
     imgGrande = null
     gameOver = false
     gameStarted = true  // Rimane true dopo il reset
