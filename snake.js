@@ -59,8 +59,11 @@ function cambiaDirezione(e){
 
 function gameLoop(){
 
-    // Puliamo il canvas rendendolo trasparente per mostrare lo sfondo della pagina
+    // Puliamo il canvas
     ctx.clearRect(0,0,400,400)
+    
+    // Opzionale: disegna un colore di base se lo sfondo CSS non carica
+    // ctx.fillStyle = "#f0f2f5"; ctx.fillRect(0,0,400,400);
     
     ctx.strokeStyle = "rgba(0, 0, 0, 0.05)" // Griglia semi-trasparente e sottile
     ctx.lineWidth = 1
