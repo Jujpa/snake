@@ -1,6 +1,9 @@
 const canvas = document.getElementById("game")
 const ctx = canvas.getContext("2d")
 
+const foodImg = new Image()
+foodImg.src = "cibo.png"
+
 let snake = [{x:200,y:200}]
 let dx = 20
 let dy = 0
@@ -133,8 +136,7 @@ function gameLoop(){
     })
 
     // disegna cibo
-    ctx.fillStyle="red"
-    ctx.fillRect(food.x,food.y,20,20)
+    ctx.drawImage(foodImg, food.x, food.y, 20, 20)
 }
 
 // controlla se sbloccare figurine
