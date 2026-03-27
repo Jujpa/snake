@@ -3,7 +3,7 @@ const ctx = canvas.getContext("2d")
 
 let snake = [{x:200,y:200}]
 let dx = 20
-y = 0
+let dy = 0
 
 let food = {x:100,y:100}
 
@@ -14,6 +14,7 @@ let mostraScritta = false   // true = mostra scritta iniziale
 let mostraImmagine = false  // true = mostra immagine sbloccata
 let imgGrande = null
 let gameOver = false       // nuovo flag per game over
+let gameStarted = false    // flag per indicare se il gioco è iniziato
 
 const figurine = [
     {punti:5, img:"images/amico1.png"},
@@ -23,6 +24,13 @@ const figurine = [
 ]
 
 document.addEventListener("keydown", cambiaDirezione)
+
+document.getElementById("startBtn").addEventListener("click", avviaGioco)
+
+function avviaGioco(){
+    gameStarted = true
+    document.getElementById("startBtn").style.display = "none"
+}
 
 function cambiaDirezione(e){
     if(gameOver && e.key === "Enter"){
@@ -58,6 +66,14 @@ function cambiaDirezione(e){
 function gameLoop(){
 
     ctx.clearRect(0,0,400,400)
+
+    if(!gameStarted){
+        ctx.font = "20px Arial"
+        ctx.fillStyle = "black"
+        ctx.textAlign = "center"
+        ctx.fillText("Premi Start per iniziare", 200, 200)
+        return
+    }
 
     if(gameOver){
         // Mostra messaggio game over
@@ -157,6 +173,7 @@ function resetGame(){
     mostraImmagine = false
     imgGrande = null
     gameOver = false
+    gameStarted = true  // Rimane true dopo il reset
 }
 
 setInterval(gameLoop,100)
