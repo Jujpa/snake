@@ -32,14 +32,7 @@ const figurine = [
 
 document.addEventListener("keydown", cambiaDirezione)
 
-function avviaGioco(){
-    gameStarted = true
-}
-
 function cambiaDirezione(e){
-    if(!gameStarted && e.key === "Enter"){
-        avviaGioco()
-        return
     // Gestione unificata del tasto Enter
     if (e.key === "Enter") {
         if (!gameStarted || gameOver) {
@@ -56,24 +49,6 @@ function cambiaDirezione(e){
             imgGrande = null
             return
         }
-    }
-
-    if(gameOver && e.key === "Enter"){
-        // Riavvia il gioco
-        resetGame()
-        return
-    }
-
-    if(e.key === "Enter" && pausa){
-        // Aggiungi immagine piccola alla galleria e riprendi il gioco
-        const img = document.createElement("img")
-        img.src = imgGrande.src
-        document.getElementById("cards").appendChild(img)
-        
-        pausa = false
-        mostraSblocco = false
-        imgGrande = null
-        return
     }
 
     if(e.key==="ArrowUp"){dx=0;dy=-20}
@@ -106,7 +81,7 @@ function gameLoop(){
     if(gameOver){
         // Mostra messaggio game over
         ctx.shadowBlur = 10; ctx.shadowColor = "rgba(0,0,0,0.5)"
-        ctx.font = "30px Arial"
+        ctx.font = "25px Arial"
         ctx.fillStyle = "red"
         ctx.textAlign = "center"
         ctx.fillText("Game Over!", 200, 180)
