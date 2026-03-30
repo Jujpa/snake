@@ -1,8 +1,16 @@
 const canvas = document.getElementById("game")
 const ctx = canvas.getContext("2d")
 
-const foodImg = new Image()
-foodImg.src = "cibo.png"
+// --- IDENTITÀ GIOCATORE ---
+let playerName = localStorage.getItem("snakePlayerName")
+if (!playerName) {
+    playerName = prompt("Benvenuto! Come ti chiami per la classifica?") || "Anonimo"
+    // Rimuoviamo caratteri che Firebase non accetta come chiavi
+    playerName = playerName.replace(/[.#$[\]]/g, "")
+    localStorage.setItem("snakePlayerName", playerName)
+}
+// Mostra il nome nel banner HTML
+document.getElementById("player-display").innerText = playerName
 
 let snake = [{x:200,y:200}]
 let dx = 20
@@ -16,6 +24,7 @@ let pausa = false
 let mostraSblocco = false  // true = mostra immagine e testo sbloccato
 let imgGrande = null
 let gameOver = false       // nuovo flag per game over
+let scoreSent = false      // per evitare di inviare il punteggio più volte per lo stesso game over
 let gameStarted = false    // flag per indicare se il gioco è iniziato
 
 const figurine = [
@@ -84,6 +93,11 @@ function gameLoop(){
     if(gameOver){
         // Mostra messaggio game over
         ctx.shadowBlur = 10; ctx.shadowColor = "rgba(0,0,0,0.5)"
+        
+        if (!scoreSent) {
+            inviaPunteggio(score)
+        }
+
         ctx.font = "25px Arial"
         ctx.fillStyle = "red"
         ctx.textAlign = "center"
@@ -171,9 +185,12 @@ function gameLoop(){
         }
     })
 
-    // Disegna cibo con una piccola ombra
+    // Disegna la stellina con una piccola ombra
     ctx.shadowBlur = 5; ctx.shadowColor = "rgba(0,0,0,0.3)"
-    ctx.drawImage(foodImg, food.x, food.y, 20, 20)
+    ctx.font = "16px Arial"
+    ctx.textAlign = "center"
+    ctx.textBaseline = "middle"
+    ctx.fillText("⭐", food.x + 10, food.y + 11)
     ctx.shadowBlur = 0 // Reset ombra per i prossimi cicli
 }
 
@@ -190,6 +207,55 @@ function controllaFigurine(){
     })
 }
 
+// Funzione per inviare il punteggio a Firebase
+function inviaPunteggio(punti) {
+    if (punti <= 0) return
+    scoreSent = true
+    
+    // Controlliamo se il nuovo punteggio è migliore del precedente record personale
+    const userScoreRef = database.ref('leaderboard/' + playerName)
+    userScoreRef.once('value').then((snapshot) => {
+        const currentBest = snapshot.val() || 0
+        if (punti > currentBest) {
+            return userScoreRef.set(punti)
+        }
+    }).then(() => {
+        console.log("Punteggio aggiornato correttamente su Firebase!")
+    }).catch((error) => {
+        console.error("Errore durante l'invio a Firebase:", error)
+    })
+}
+
+// Funzione per caricare la classifica in tempo reale
+function ascoltaClassifica() {
+    const scoresRef = database.ref('leaderboard')
+    // Prendiamo i primi 10 ordinati per valore
+    scoresRef.orderByValue().limitToLast(10).on('value', (snapshot) => {
+        const list = document.getElementById("scores-list")
+        list.innerHTML = ""
+        let entries = []
+        snapshot.forEach((child) => {
+            entries.push({ name: child.key, score: child.val() })
+        })
+        // Firebase ordina dal più basso, noi invertiamo per avere il primo in alto
+        entries.reverse().forEach((entry, index) => {
+            const li = document.createElement("li")
+            if (index === 0) li.className = "rank-1"
+            
+            const medal = index === 0 ? "🥇 " : (index === 1 ? "🥈 " : (index === 2 ? "🥉 " : `#${index + 1} `))
+            
+            li.innerHTML = `
+                <span>${medal} ${entry.name}</span>
+                <span class="score-value">${entry.score}</span>
+            `
+            list.appendChild(li)
+        })
+    })
+}
+
+// Avviamo l'ascolto della classifica all'avvio
+ascoltaClassifica()
+
 // reset gioco
 function resetGame(){
     snake = [{x:200,y:200}]
@@ -204,6 +270,7 @@ function resetGame(){
     mostraSblocco = false
     imgGrande = null
     gameOver = false
+    scoreSent = false
     gameStarted = true  // Rimane true dopo il reset
 }
 
