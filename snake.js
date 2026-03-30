@@ -60,10 +60,16 @@ function cambiaDirezione(e){
         }
     }
 
-    if(e.key==="ArrowUp"){dx=0;dy=-20}
-    if(e.key==="ArrowDown"){dx=0;dy=20}
-    if(e.key==="ArrowLeft"){dx=-20;dy=0}
-    if(e.key==="ArrowRight"){dx=20;dy=0}
+    if(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
+        e.preventDefault() // Impedisce lo scroll della pagina
+        if(e.key==="ArrowUp"){dx=0;dy=-20}
+        if(e.key==="ArrowDown"){dx=0;dy=20}
+        if(e.key==="ArrowLeft"){dx=-20;dy=0}
+        if(e.key==="ArrowRight"){dx=20;dy=0}
+    }
+    // Se non è una freccia, ma è Enter, non preveniamo il default qui
+    // perché la gestione di Enter è già specifica e non causa scroll indesiderato.
+    // Se volessimo prevenire il default per Enter, andrebbe fatto all'interno del blocco di Enter.
 }
 
 function gameLoop(){
